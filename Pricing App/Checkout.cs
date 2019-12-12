@@ -20,27 +20,36 @@ namespace Pricing_App
 
         public void Scan(string item)
         {
-            var applicableRules = _pricingRules.Items.Where(x => GetMatchingRule(x, item));
+            var applicableRules = _pricingRules.Items.Where(x => IsMatchingRule(x, item));
 
-            Total = applicableRules.Sum(x =>
-                x.SpecialPrice.Price * item.Count(y => y.ToString() == x.Name) /
-                x.SpecialPrice
-                    .Quantity) + RemoveItems(applicableRules.ToList(), item).Sum(x => _pricingRules.Items.First(y => y.Name == x.ToString()).UnitPrice);
+            var totalPriceOfSpecialPriceItems = applicableRules.Sum(x => x.SpecialPrice.Price * (item.Count(y => y.ToString() == x.Name)/x.SpecialPrice.Quantity));
+
+            var totalPriceOfNonSpecialPriceItems = GetNonSpecialPriceItems(applicableRules.ToList(), item).Sum(x => _pricingRules.Items.First(y => y.Name == x.ToString()).UnitPrice);
+
+            Total = totalPriceOfSpecialPriceItems + totalPriceOfNonSpecialPriceItems;
         }
 
-        public string RemoveItems(List<PricingRule> rules, string item)
+        public string GetNonSpecialPriceItems(List<PricingRule> rules, string item)
         {
             var items = string.Concat(item.OrderBy(x => x)).ToList();
 
             foreach (var rule in rules)
             {
-                items.RemoveRange(items.IndexOf(rule.Name.ToCharArray().First()), rule.SpecialPrice.Quantity * item.Count(x => x.ToString() == rule.Name) / rule.SpecialPrice.Quantity);
+                var count = rule.SpecialPrice.Quantity * (item.Count(x => x.ToString() == rule.Name)/rule.SpecialPrice.Quantity);
+                var startIndex = items.IndexOf(rule.Name.ToCharArray().First());
+
+                items.RemoveRange(startIndex, count);
             }
 
             return string.Concat(items);
         }
 
-        public bool GetMatchingRule(PricingRule pricingRule, string item)
+        //public int QuantityOfSpecialPricesGroups(List<PricingRule> rules)
+        //{
+        //    item.Count(x => x.ToString() == rule.Name) / rule.SpecialPrice.Quantity
+        //}
+
+        public bool IsMatchingRule(PricingRule pricingRule, string item)
         {
             return item.Count(x => x.ToString() == pricingRule.Name) >= pricingRule.SpecialPrice.Quantity;
         }
