@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using Pricing_App.Dtos;
 
 namespace Pricing_App
 {
@@ -8,7 +9,20 @@ namespace Pricing_App
     {
         public static void Main(string[] args)
         {
-            var pricingRules = new PricingRules
+            var pricingRules = GetPricingRules();
+
+            var itemsList = "AABAAAA";
+
+            var checkout = new Checkout(pricingRules);
+
+            checkout.Scan(itemsList);
+
+            var price = checkout.Total;
+        }
+
+        public static PricingRules GetPricingRules()
+        {
+            return new PricingRules
             {
                 Items = new List<PricingRule>
                 {
@@ -35,23 +49,16 @@ namespace Pricing_App
                     new PricingRule
                     {
                         Name = "C",
+                        SpecialPrice = new SpecialPrice
+                        {
+                            Price = 130,
+                            Quantity = 3
+                        },
                         UnitPrice = 20
                     }
                 }
-               
+
             };
-
-            var checkout = new Checkout(pricingRules);
-
-            var itemsList = "AAABB";
-            checkout.Scan(itemsList);
-
-            //foreach (var item in itemsList)
-            //{
-            //    checkout.Scan(item.ToString());
-            //}
-
-            var price = checkout.Total;
         }
     }
 }

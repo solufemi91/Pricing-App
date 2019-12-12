@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using Pricing_App.Dtos;
 
 namespace Pricing_App
 {
@@ -18,33 +20,30 @@ namespace Pricing_App
 
         public void Scan(string item)
         {
-            // go through each special rule and check if it applies
-            // for e.g. is 3As present? return the rule
-            // does the item contain the letter A three times?
-            // if so, calculate cost, and remove the items from the list
+            var applicableRules = _pricingRules.Items.Where(x => GetMatchingRule(x, item));
 
-            var rule = _pricingRules.Items.Where(pricingRule => item.Count(x => x.ToString() == pricingRule.Name) == pricingRule.SpecialPrice.Quantity);
-            //Total += _pricingRules.Items.First(x => x.Name == item).UnitPrice;
+            Total = applicableRules.Sum(x =>
+                x.SpecialPrice.Price * item.Count(y => y.ToString() == x.Name) /
+                x.SpecialPrice
+                    .Quantity) + RemoveItems(applicableRules.ToList(), item).Sum(x => _pricingRules.Items.First(y => y.Name == x.ToString()).UnitPrice);
+        }
+
+        public string RemoveItems(List<PricingRule> rules, string item)
+        {
+            var items = string.Concat(item.OrderBy(x => x)).ToList();
+
+            foreach (var rule in rules)
+            {
+                items.RemoveRange(items.IndexOf(rule.Name.ToCharArray().First()), rule.SpecialPrice.Quantity * item.Count(x => x.ToString() == rule.Name) / rule.SpecialPrice.Quantity);
+            }
+
+            return string.Concat(items);
+        }
+
+        public bool GetMatchingRule(PricingRule pricingRule, string item)
+        {
+            return item.Count(x => x.ToString() == pricingRule.Name) >= pricingRule.SpecialPrice.Quantity;
         }
     }
 
-    public class PricingRules
-    {
-        public List<PricingRule> Items { get; set; }
-    }
-
-
-    public class PricingRule
-    {
-        public string Name { get; set; }
-        public int UnitPrice { get; set; }
-        public SpecialPrice SpecialPrice { get; set; }
-    }
-
-    public class SpecialPrice
-    {
-        public int Quantity { get; set; }
-
-        public int Price { get; set; }
-    }
 }
