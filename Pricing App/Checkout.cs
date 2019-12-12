@@ -20,13 +20,16 @@ namespace Pricing_App
 
         public void Scan(string basketItems)
         {
-            var applicableRules = _pricingRules.Items.Where(x => IsMatchingRule(x, basketItems));
+            var applicableRules = _pricingRules.Items
+                .Where(x => IsMatchingRule(x, basketItems));
 
-            var totalPriceOfSpecialPriceItems = applicableRules.Sum(x => x.SpecialPrice.Price * QuantityOfSpecialPricesGroups(x, basketItems));
+            var totalPriceOfSpecialPriceItems = applicableRules
+                .Sum(x => x.SpecialPrice.Price * QuantityOfSpecialPricesGroups(x, basketItems));
 
             var nonSpecialPriceItems = GetNonSpecialPriceItems(applicableRules, basketItems);
 
-            var totalPriceOfNonSpecialPriceItems = nonSpecialPriceItems.Sum(x => _pricingRules.Items.First(y => y.Name == x.ToString()).UnitPrice);
+            var totalPriceOfNonSpecialPriceItems = nonSpecialPriceItems
+                .Sum(x => _pricingRules.Items.First(y => y.Name == x.ToString()).UnitPrice);
 
             Total = totalPriceOfSpecialPriceItems + totalPriceOfNonSpecialPriceItems;
         }
