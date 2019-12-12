@@ -11,7 +11,7 @@ namespace Pricing_App
         {
             var pricingRules = GetPricingRules();
 
-            var itemsList = "ABABA";
+            var itemsList = "ABABCCCCA";
 
             var checkout = new Checkout(pricingRules);
 
